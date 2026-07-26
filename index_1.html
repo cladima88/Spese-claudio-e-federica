@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestione Spese</title>
+<style>
+:root{
+  --ink:#2b2420;
+  --paper:#faf6ee;
+  --panel:#ffffff;
+  --line:#e4dccb;
+  --wine:#7a2632;
+  --wine-dark:#5c1c25;
+  --gold:#b8873a;
+  --sea:#2f5d5a;
+  --sea-light:#e8f0ef;
+  --good:#2f6b4f;
+  --bad:#a5372b;
+  --muted:#8a8073;
+  --radius:10px;
+  font-family:'Iowan Old Style','Georgia',serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  font-size:14px;
+  padding-bottom:60px;
+}
+header.top{
+  background:linear-gradient(135deg,var(--wine-dark),var(--wine));
+  color:#f7ece2;
+  padding:18px 20px 14px;
+  position:sticky; top:0; z-index:30;
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+header.top h1{
+  margin:0 0 2px;
+  font-family:'Iowan Old Style','Georgia',serif;
+  font-weight:600;
+  font-size:20px;
+  letter-spacing:.3px;
+}
+header.top .sub{
+  font-size:12px;
+  opacity:.85;
+}
+nav.tabs{
+  display:flex;
+  gap:6px;
+  padding:10px 20px;
+  background:var(--panel);
+  border-bottom:1px solid var(--line);
+  position:sticky; top:64px; z-index:29;
+  overflow-x:auto;
+  align-items:center;
+  flex-wrap:wrap;
+}
+nav.tabs button{
+  border:1px solid var(--line);
+  background:var(--paper);
+  color:var(--ink);
+  padding:7px 13px;
+  border-radius:999px;
+  font-size:12.5px;
+  cursor:pointer;
+  white-space:nowrap;
+  font-weight:600;
+}
+nav.tabs button.active{
+  background:var(--wine);
+  border-color:var(--wine);
+  color:#fff;
+}
+nav.tabs select{
+  border:1px solid var(--line);
+  background:var(--paper);
+  color:var(--ink);
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12.5px;
+  font-weight:600;
+  cursor:pointer;
+}
+nav.tabs .yearbox{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:var(--muted);
+}
+nav.tabs .yearbox input{
+  width:64px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:5px 7px;
+  font-size:12.5px;
+}
+main{max-width:1100px; margin:0 auto; padding:18px 20px;}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  margin-bottom:16px;
+  overflow:hidden;
+}
+.card .head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid var(--line);
+  background:#fbf8f2;
+}
+.card .head h2{
+  margin:0;
+  font-size:14.5px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.card .head .actions{display:flex; gap:6px;}
+.btn{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  padding:5px 10px;
+  border-radius:6px;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+.btn:hover{border-color:var(--gold);}
+.btn.primary{background:var(--sea); border-color:var(--sea); color:#fff;}
+.btn.danger{background:#fff; border-color:var(--bad); color:var(--bad);}
+.btn.small{padding:3px 7px; font-size:11px;}
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th,td{
+  padding:6px 8px;
+  border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line);
+  text-align:left;
+  vertical-align:middle;
+}
+th:last-child,td:last-child{border-right:none;}
+th.num,td.num{text-align:right;}
+th.num .colhead{justify-content:flex-end;}
+th{
+  background:#fbf8f2;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  color:var(--muted);
+  font-weight:700;
+  white-space:nowrap;
+}
+th .colhead{display:flex; align-items:center; gap:5px;}
+tbody tr:hover{background:#fbf9f4;}
+td input, td select{
+  width:100%;
+  border:1px solid transparent;
+  background:transparent;
+  padding:5px 4px;
+  font-size:13px;
+  border-radius:5px;
+  font-family:inherit;
+  color:var(--ink);
+}
+td input:hover,td select:hover{border-color:var(--line);}
+td input:focus,td select:focus{
+  border-color:var(--sea);
+  background:#fff;
+  outline:none;
+}
+td input[type=checkbox]{width:16px; height:16px;}
+td.num input{text-align:right;}
+tfoot td{
+  font-weight:700;
+  background:#fbf8f2;
+  border-top:2px solid var(--line);
+  border-bottom:none;
+}
+td.rowdel{width:30px; text-align:center;}
+td.rowdel button{
+  border:none; background:none; color:var(--bad); cursor:pointer; font-size:15px;
+  opacity:.5;
+}
+td.rowdel button:hover{opacity:1;}
+.emptyrow{color:var(--muted); font-style:italic; padding:14px 16px; font-size:12.5px;}
+.foot-add{padding:8px 16px; border-top:1px solid var(--line); display:flex; gap:8px;}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:0;
+}
+.summary-grid .cell{
+  padding:14px 16px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.summary-grid .cell:last-child{border-right:none;}
+.summary-grid .cell .label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px;}
+.summary-grid .cell .value{font-size:19px; font-weight:700;}
+.summary-grid .cell .value.good{color:var(--good);}
+.summary-grid .cell .value.bad{color:var(--bad);}
+.pctrow{display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; font-size:13px;}
+.pctrow label{display:flex; align-items:center; gap:6px; font-weight:600;}
+.pctrow input[type=number]{width:60px; border:1px solid var(--line); border-radius:6px; padding:4px 6px; font-size:13px;}
+.saldo-line{padding:12px 16px; font-size:13.5px; border-top:1px solid var(--line); background:#fbf8f2;}
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700;
+}
+.badge.good{background:#e4f3ea; color:var(--good);}
+.badge.bad{background:#fbe7e4; color:var(--bad);}
+.dash-table td, .dash-table th{font-size:12.5px;}
+.dash-table td.tot, .dash-table th.tot{font-weight:700; background:#fbf8f2;}
+.hint{font-size:11.5px; color:var(--muted); padding:0 16px 12px;}
+footer.savebar{
+  position:fixed; bottom:0; left:0; right:0;
+  background:var(--panel); border-top:1px solid var(--line);
+  padding:8px 20px; font-size:11.5px; color:var(--muted);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.storage-warn{color:var(--bad); font-weight:600;}
+.recurring-row-actions{display:flex; gap:6px; align-items:center;}
+select.mini{font-size:12px; padding:4px 6px; border-radius:6px; border:1px solid var(--line);}
+@media(max-width:640px){
+  .summary-grid .cell{border-right:none;}
+  main{padding:14px 10px;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Gestione Spese di Casa</h1>
+  <div class="sub" id="subhead">Casa · Alimentare · Benzina · Varie · Rate — divisione spese editabile</div>
+</header>
+
+<nav class="tabs" id="navtabs"></nav>
+
+<main id="main"></main>
+
+<footer class="savebar">
+  <span id="saveStatus">Pronto.</span>
+  <span id="syncStatus">Salvataggio locale — condivisione multi-utente disponibile in una fase successiva.</span>
+</footer>
+
+<script>
+/* ---------------------------------------------------------
+   MODELLO DATI
+--------------------------------------------------------- */
+const MONTHS = [
+  {key:'01',label:'Gennaio'},{key:'02',label:'Febbraio'},{key:'03',label:'Marzo'},
+  {key:'04',label:'Aprile'},{key:'05',label:'Maggio'},{key:'06',label:'Giugno'},
+  {key:'07',label:'Luglio'},{key:'08',label:'Agosto'},{key:'09',label:'Settembre'},
+  {key:'10',label:'Ottobre'},{key:'11',label:'Novembre'},{key:'12',label:'Dicembre'}
+];
+
+const SECTION_DEFS = [
+  {key:'casa',        label:'Spese Casa',           icon:'🏠', kind:'spesa'},
+  {key:'alimentare',  label:'Spesa Alimentare',     icon:'🛒', kind:'spesa'},
+  {key:'benzina',     label:'Benzina',              icon:'⛽', kind:'spesa'},
+  {key:'varie',       label:'Spese Varie',          icon:'🧾', kind:'spesa'},
+  {key:'rate',        label:'Rate e Finanziamenti', icon:'💳', kind:'rata'}
+];
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+// Le categorie fisse + quelle personalizzate create dall'utente (valide per tutti i mesi)
+function allSectionDefs(){
+  const custom = (DB && DB.customCategories) ? DB.customCategories : [];
+  return SECTION_DEFS.concat(custom.map(c => ({key:c.key, label:c.label, icon:c.icon||'🏷️', kind:'spesa', custom:true})));
+}
+
+function defaultColumnsFor(kind){
+  if(kind === 'rata'){
+    return [
+      {id:'nome',      label:'Finanziamento', type:'text'},
+      {id:'importo',   label:'Importo rata €', type:'number'},
+      {id:'scadenza',  label:'Scadenza', type:'date'},
+      {id:'progress',  label:'Rata n°', type:'text'},
+      {id:'pagatoda',  label:'Pagato da', type:'select', options:['Claudio','Federica','Comune']},
+      {id:'condivisa', label:'Condivisa', type:'checkbox'}
+    ];
+  }
+  return [
+    {id:'data',      label:'Data', type:'date'},
+    {id:'voce',      label:'Voce', type:'text'},
+    {id:'claudio',   label:'Claudio €', type:'number'},
+    {id:'federica',  label:'Federica €', type:'number'},
+    {id:'condivisa', label:'Condivisa', type:'checkbox'}
+  ];
+}
+
+function newSection(kind){
+  return { columns: defaultColumnsFor(kind), rows: [] };
+}
+
+function newMonth(){
+  const sections = {};
+  allSectionDefs().forEach(s => sections[s.key] = newSection(s.kind));
+  return { splitPct: {claudio:50, federica:50}, sections, adjustments: [] };
+}
+
+function defaultDB(){
+  const months = {};
+  MONTHS.forEach(m => months[m.key] = newMonth()); // ok: nessuna categoria custom ancora
+  return {
+    meta:{ anno: new Date().getFullYear(), splitDefault:{claudio:50, federica:50} },
+    months,
+    recurring: [],
+    customCategories: []
+  };
+}
+
+let DB = null;
+let ACTIVE = 'dashboard'; // 'dashboard' | 'recurring' | '01'..'12'
+let RECURRING_TARGET_MONTH = MONTHS[new Date().getMonth()].key;
+
+/* ---------------------------------------------------------
+   STORAGE
+--------------------------------------------------------- */
+// --- Configurazione Supabase (sincronizzazione tra telefono/PC/altri device) ---
+// 1) Esegui in Supabase > SQL Editor lo script di creazione tabella (vedi istruzioni fornite).
+// 2) Incolla qui sotto la tua "anon public key" (Supabase > Settings > API).
+//    Finché SUPABASE_ANON_KEY resta vuota, l'app funziona comunque in locale (solo su questo browser).
+const SUPABASE_URL = 'https://daqjoefvppihzifczxfb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhcWpvZWZ2cHBpaHppZmN6eGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMTUyMjksImV4cCI6MjA5NTg5MTIyOX0.M2eBx8ubSZckOvPL9sD-F1bIVLc0RejnuFGNNvI0-B4';
+const SUPABASE_TABLE = 'spese_dati';
+const HAS_SUPABASE = !!SUPABASE_ANON_KEY;
+
+// window.storage esiste solo dentro claude.ai. Se il file viene aperto direttamente
+// nel browser (file:// o hosting statico) senza Supabase configurato, usiamo
+// localStorage come fallback: i dati restano salvati solo su questo browser/device.
+const HAS_CLAUDE_STORAGE = (typeof window.storage !== 'undefined' && window.storage !== null);
+const LOCAL_KEY = 'gestione-spese-db';
+
+let saveTimer = null;
+function scheduleSave(){
+  const el = document.getElementById('saveStatus');
+  if(el){ el.textContent = 'Modifiche in corso…'; el.className=''; }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 600);
+}
+async function doSave(){
+  const el = document.getElementById('saveStatus');
+  try{
+    if(HAS_SUPABASE){
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + '?on_conflict=chiave', {
+        method: 'POST',
+        headers:{
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify([{ chiave:'app-data', valore: DB, updated_at: new Date().toISOString() }])
+      });
+      if(!res.ok) throw new Error('Supabase save failed: ' + res.status);
+    } else if(HAS_CLAUDE_STORAGE){
+      await window.storage.set('app-data', JSON.stringify(DB), false);
+    } else {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(DB));
+    }
+    if(el){
+      el.textContent = 'Salvato ' + new Date().toLocaleTimeString('it-IT') +
+        (HAS_SUPABASE ? ' (sincronizzato su tutti i device)' : HAS_CLAUDE_STORAGE ? '' : ' (solo in questo browser)');
+      el.className='';
+    }
+  }catch(e){
+    console.error(e);
+    if(el){ el.textContent = 'Errore di salvataggio — le modifiche restano solo in questa sessione.'; el.className='storage-warn'; }
+  }
+}
+async function loadDB(){
+  try{
+    if(HAS_SUPABASE){
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + '?chiave=eq.app-data&select=valore', {
+        headers:{ 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      if(!res.ok) throw new Error('Supabase load failed: ' + res.status);
+      const rows = await res.json();
+      DB = (rows && rows[0] && rows[0].valore) ? migrate(rows[0].valore) : defaultDB();
+    } else if(HAS_CLAUDE_STORAGE){
+      const res = await window.storage.get('app-data', false);
+      DB = (res && res.value) ? migrate(JSON.parse(res.value)) : defaultDB();
+    } else {
+      const raw = localStorage.getItem(LOCAL_KEY);
+      DB = raw ? migrate(JSON.parse(raw)) : defaultDB();
+    }
+  }catch(e){
+    console.error(e);
+    DB = defaultDB();
+  }
+}
+// Ricarica i dati da Supabase quando si torna sulla scheda/app (es. dopo una modifica fatta da un altro device)
+if(typeof window !== 'undefined'){
+  window.addEventListener('focus', async ()=>{
+    if(!HAS_SUPABASE || !DB) return;
+    await loadDB();
+    render();
+  });
+}
+function migrate(db){
+  const fresh = defaultDB();
+  db.meta = Object.assign(fresh.meta, db.meta||{});
+  db.months = db.months || {};
+  db.customCategories = db.customCategories || [];
+  const defs = SECTION_DEFS.concat(db.customCategories.map(c=>({key:c.key, label:c.label, icon:c.icon||'🏷️', kind:'spesa'})));
+  MONTHS.forEach(m=>{
+    if(!db.months[m.key]) db.months[m.key] = newMonth();
+    const mo = db.months[m.key];
+    mo.splitPct = mo.splitPct || {claudio:50, federica:50};
+    mo.sections = mo.sections || {};
+    defs.forEach(s=>{
+      if(!mo.sections[s.key]) mo.sections[s.key] = newSection(s.kind);
+      if(!mo.sections[s.key].columns) mo.sections[s.key].columns = defaultColumnsFor(s.kind);
+      if(!mo.sections[s.key].rows) mo.sections[s.key].rows = [];
+    });
+    mo.adjustments = mo.adjustments || [];
+  });
+  db.recurring = db.recurring || [];
+  return db;
+}
+
+// Aggiunge una nuova categoria (sezione) personalizzata, disponibile in tutti i 12 mesi
+function addCustomCategory(label, icon){
+  const key = 'cat_' + uid();
+  DB.customCategories = DB.customCategories || [];
+  DB.customCategories.push({key, label, icon: icon || '🏷️'});
+  MONTHS.forEach(m=>{
+    const mo = DB.months[m.key];
+    if(!mo.sections[key]) mo.sections[key] = newSection('spesa');
+  });
+  scheduleSave();
+  return key;
+}
+
+// Elimina una categoria personalizzata e i relativi dati in tutti i mesi
+function removeCustomCategory(key){
+  DB.customCategories = (DB.customCategories||[]).filter(c=>c.key !== key);
+  MONTHS.forEach(m=>{
+    delete DB.months[m.key].sections[key];
+  });
+  scheduleSave();
+}
+
+/* ---------------------------------------------------------
+   HELPERS DI CALCOLO
+--------------------------------------------------------- */
+function numOf(v){
+  if(typeof v === 'number') return v;
+  if(!v) return 0;
+  const n = parseFloat(String(v).replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+function columnSums(section){
+  const sums = {};
+  section.columns.forEach(c=>{
+    if(c.type === 'number'){
+      sums[c.id] = section.rows.reduce((acc,r)=> acc + numOf(r.cells[c.id]), 0);
+    }
+  });
+  return sums;
+}
+
+// Calcola totali condivisi/personali per un mese, sezione per sezione.
+// Ogni voce (comprese le rate) entra nella divisione solo se "Condivisa" è spuntata:
+// l'utente decide riga per riga cosa dividere e cosa tenere come spesa personale.
+function computeMonthTotals(monthKey){
+  const mo = DB.months[monthKey];
+  let comune = 0, pagatoClaudio = 0, pagatoFederica = 0;
+  let personaleClaudio = 0, personaleFederica = 0;
+  const perCategoria = {};
+
+  allSectionDefs().forEach(def=>{
+    const sec = mo.sections[def.key];
+    let catTotale = 0;
+    if(def.kind === 'rata'){
+      sec.rows.forEach(r=>{
+        const importo = numOf(r.cells.importo);
+        const chi = r.cells.pagatoda || 'Claudio';
+        const cond = r.cells.condivisa !== false;
+        catTotale += importo;
+        if(cond){
+          comune += importo;
+          if(chi === 'Claudio') pagatoClaudio += importo;
+          else if(chi === 'Federica') pagatoFederica += importo;
+          else { pagatoClaudio += importo/2; pagatoFederica += importo/2; }
+        } else {
+          if(chi === 'Federica') personaleFederica += importo;
+          else personaleClaudio += importo; // Comune non condivisa -> attribuita a Claudio per default
+        }
+      });
+    } else {
+      sec.rows.forEach(r=>{
+        const c = numOf(r.cells.claudio);
+        const f = numOf(r.cells.federica);
+        // di default ogni voce è condivisa: basta deselezionare "Condivisa" per escluderla
+        const cond = r.cells.condivisa !== false;
+        catTotale += c + f;
+        if(cond){
+          comune += c + f;
+          pagatoClaudio += c;
+          pagatoFederica += f;
+        } else {
+          personaleClaudio += c;
+          personaleFederica += f;
+        }
+      });
+    }
+    perCategoria[def.key] = catTotale;
+  });
+
+  const pct = mo.splitPct || {claudio:50, federica:50};
+  const quotaClaudio = comune * (numOf(pct.claudio)/100);
+  const quotaFederica = comune * (numOf(pct.federica)/100);
+  const saldoDivisione = pagatoClaudio - quotaClaudio; // positivo => Federica deve dare a Claudio (solo spese divise)
+
+  // rettifiche manuali: importi extra a favore di uno dei due, non soggetti a divisione
+  const adjustments = mo.adjustments || [];
+  let adjTotal = 0;
+  adjustments.forEach(a=>{
+    const imp = numOf(a.importo);
+    if(a.favore === 'Federica') adjTotal -= imp; else adjTotal += imp;
+  });
+  const saldo = saldoDivisione + adjTotal; // saldo finale, comprese le rettifiche
+
+  // totale generale = somma di tutte le categorie, evita doppi conteggi
+  const totaleGenerale = Object.values(perCategoria).reduce((a,b)=>a+b, 0);
+
+  return {
+    comune, pagatoClaudio, pagatoFederica, personaleClaudio, personaleFederica,
+    quotaClaudio, quotaFederica, saldo, saldoDivisione, adjTotal, perCategoria, totaleGenerale
+  };
+}
+
+function eur(n){
+  return (n||0).toLocaleString('it-IT', {style:'currency', currency:'EUR'});
+}
+
+/* ---------------------------------------------------------
+   RENDER: NAV
+--------------------------------------------------------- */
+function renderNav(){
+  const nav = document.getElementById('navtabs');
+  nav.innerHTML = '';
+
+  const dashBtn = document.createElement('button');
+  dashBtn.textContent = '📊 Dashboard';
+  dashBtn.className = ACTIVE === 'dashboard' ? 'active' : '';
+  dashBtn.onclick = () => { ACTIVE = 'dashboard'; render(); };
+  nav.appendChild(dashBtn);
+
+  const recBtn = document.createElement('button');
+  recBtn.textContent = '🔁 Ricorrenti';
+  recBtn.className = ACTIVE === 'recurring' ? 'active' : '';
+  recBtn.onclick = () => { ACTIVE = 'recurring'; render(); };
+  nav.appendChild(recBtn);
+
+  if(HAS_SUPABASE){
+    const refreshBtn = document.createElement('button');
+    refreshBtn.textContent = '🔄 Aggiorna';
+    refreshBtn.title = 'Ricarica i dati più recenti (se hai modificato da un altro device)';
+    refreshBtn.onclick = async () => { await loadDB(); render(); };
+    nav.appendChild(refreshBtn);
+  }
+
+  const sel = document.createElement('select');
+  const optPlaceholder = document.createElement('option');
+  optPlaceholder.textContent = 'Vai al mese…';
+  optPlaceholder.value = '';
+  sel.appendChild(optPlaceholder);
+  MONTHS.forEach(m=>{
+    const o = document.createElement('option');
+    o.value = m.key; o.textContent = m.label;
+    if(ACTIVE === m.key) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = () => { if(sel.value){ ACTIVE = sel.value; render(); } };
+  nav.appendChild(sel);
+
+  if(MONTHS.some(m=>m.key===ACTIVE)){
+    const cur = MONTHS.find(m=>m.key===ACTIVE);
+    const label = document.createElement('span');
+    label.style.fontWeight = '700';
+    label.style.fontSize = '13px';
+    label.textContent = cur.label;
+    nav.appendChild(label);
+  }
+
+  const yearBox = document.createElement('div');
+  yearBox.className = 'yearbox';
+  yearBox.innerHTML = 'Anno <input type="number" id="yearInput" value="' + DB.meta.anno + '">';
+  nav.appendChild(yearBox);
+  document.getElementById('yearInput').onchange = (e)=>{
+    DB.meta.anno = parseInt(e.target.value)||DB.meta.anno;
+    scheduleSave();
+    renderNav();
+  };
+}
+
+/* ---------------------------------------------------------
+   RENDER: TABELLA GENERICA (usata da sezioni mese)
+--------------------------------------------------------- */
+// onDataChange: valore di una cella cambiato (salva + aggiorna somme/riepilogo, NIENTE rebuild del DOM -> non fa perdere il focus)
+// onStructuralChange: riga/colonna aggiunta o rimossa (richiede di ricostruire la tabella)
+function renderTable(section, onDataChange, onStructuralChange, opts){
+  opts = opts || {};
+  const wrap = document.createElement('div');
+  const table = document.createElement('table');
+
+  // HEAD
+  const thead = document.createElement('thead');
+  const trh = document.createElement('tr');
+  section.columns.forEach((col, idx)=>{
+    const th = document.createElement('th');
+    if(col.type === 'number') th.className = 'num';
+    const box = document.createElement('div');
+    box.className = 'colhead';
+    const span = document.createElement('span');
+    span.textContent = col.label;
+    box.appendChild(span);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn small';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Elimina colonna';
+    delBtn.onclick = ()=>{
+      if(section.columns.length <= 1) return;
+      if(!confirm('Eliminare la colonna "'+col.label+'"?')) return;
+      section.columns.splice(idx,1);
+      onStructuralChange();
+    };
+    box.appendChild(delBtn);
+    th.appendChild(box);
+    trh.appendChild(th);
+  });
+  trh.appendChild(document.createElement('th')); // colonna elimina riga
+  thead.appendChild(trh);
+  table.appendChild(thead);
+
+  // BODY
+  const tbody = document.createElement('tbody');
+  if(section.rows.length === 0){
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = section.columns.length + 1;
+    td.className = 'emptyrow';
+    td.textContent = 'Nessuna voce. Aggiungi una riga per iniziare.';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+
+  function handleCellChange(){
+    updateFoot();
+    onDataChange();
+  }
+
+  section.rows.forEach(row=>{
+    const tr = document.createElement('tr');
+    section.columns.forEach(col=>{
+      const td = document.createElement('td');
+      if(col.type === 'number') td.className = 'num';
+      let input;
+      if(col.type === 'select'){
+        input = document.createElement('select');
+        (col.options||[]).forEach(optVal=>{
+          const o = document.createElement('option');
+          o.value = optVal; o.textContent = optVal;
+          if(row.cells[col.id] === optVal) o.selected = true;
+          input.appendChild(o);
+        });
+        input.onchange = ()=>{ row.cells[col.id] = input.value; handleCellChange(); };
+      } else if(col.type === 'checkbox'){
+        input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = !!row.cells[col.id];
+        input.onchange = ()=>{ row.cells[col.id] = input.checked; handleCellChange(); };
+      } else if(col.type === 'date'){
+        input = document.createElement('input');
+        input.type = 'date';
+        input.value = row.cells[col.id] || '';
+        input.oninput = ()=>{ row.cells[col.id] = input.value; handleCellChange(); };
+      } else if(col.type === 'number'){
+        input = document.createElement('input');
+        input.type = 'number';
+        input.step = '0.01';
+        input.placeholder = '0';
+        input.value = (row.cells[col.id] === undefined || row.cells[col.id] === '') ? '' : row.cells[col.id];
+        input.oninput = ()=>{ row.cells[col.id] = input.value; handleCellChange(); };
+      } else {
+        input = document.createElement('input');
+        input.type = 'text';
+        input.value = row.cells[col.id] || '';
+        input.oninput = ()=>{ row.cells[col.id] = input.value; handleCellChange(); };
+      }
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    const tdDel = document.createElement('td');
+    tdDel.className = 'rowdel';
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '🗑';
+    delBtn.onclick = ()=>{
+      const i = section.rows.indexOf(row);
+      section.rows.splice(i,1);
+      onStructuralChange();
+    };
+    tdDel.appendChild(delBtn);
+    tr.appendChild(tdDel);
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  // FOOT: somme colonne numeriche (aggiornabili senza ricostruire la tabella)
+  const tfoot = document.createElement('tfoot');
+  function updateFoot(){
+    tfoot.innerHTML = '';
+    const tr = document.createElement('tr');
+    const sums = columnSums(section);
+    section.columns.forEach(col=>{
+      const td = document.createElement('td');
+      if(col.type === 'number'){ td.textContent = eur(sums[col.id]); td.className='num'; }
+      tr.appendChild(td);
+    });
+    tr.appendChild(document.createElement('td'));
+    tfoot.appendChild(tr);
+  }
+  if(!opts.hideFooter){
+    updateFoot();
+    table.appendChild(tfoot);
+  }
+
+  wrap.appendChild(table);
+  return wrap;
+}
+
+function addRowControls(section, onStructuralChange){
+  const bar = document.createElement('div');
+  bar.className = 'foot-add';
+
+  const addRowBtn = document.createElement('button');
+  addRowBtn.className = 'btn primary';
+  addRowBtn.textContent = '+ Riga';
+  addRowBtn.onclick = ()=>{
+    const cells = {};
+    section.columns.forEach(c=>{
+      if(c.type === 'checkbox') cells[c.id] = true;
+      else if(c.type === 'select') cells[c.id] = (c.options && c.options[0]) || '';
+      else cells[c.id] = '';
+    });
+    section.rows.push({id: uid(), cells});
+    onStructuralChange();
+  };
+  bar.appendChild(addRowBtn);
+
+  const addColBtn = document.createElement('button');
+  addColBtn.className = 'btn';
+  addColBtn.textContent = '+ Colonna';
+  addColBtn.onclick = ()=>{
+    const label = prompt('Nome della nuova colonna:');
+    if(!label) return;
+    const typeChoice = prompt('Tipo (testo / numero / data / checkbox):', 'testo');
+    let type = 'text';
+    if(typeChoice){
+      const t = typeChoice.trim().toLowerCase();
+      if(t.startsWith('num')) type = 'number';
+      else if(t.startsWith('dat')) type = 'date';
+      else if(t.startsWith('check')||t.startsWith('sp')) type = 'checkbox';
+    }
+    const id = 'c_' + uid();
+    section.columns.push({id, label, type});
+    section.rows.forEach(r => r.cells[id] = type === 'checkbox' ? false : '');
+    onStructuralChange();
+  };
+  bar.appendChild(addColBtn);
+  return bar;
+}
+
+/* ---------------------------------------------------------
+   RENDER: PAGINA MESE
+--------------------------------------------------------- */
+// Stato di apertura/chiusura delle card (solo in sessione, chiuse di default)
+const COLLAPSE_STATE = {};
+
+function renderMonthPage(monthKey){
+  const container = document.createElement('div');
+
+  allSectionDefs().forEach(def=>{
+    container.appendChild(renderSectionCard(monthKey, def));
+  });
+
+  const addCatBar = document.createElement('div');
+  addCatBar.style.cssText = 'margin:-4px 0 16px;';
+  const addCatBtn = document.createElement('button');
+  addCatBtn.className = 'btn';
+  addCatBtn.textContent = '+ Nuova categoria';
+  addCatBtn.onclick = ()=>{
+    const label = prompt('Nome della nuova categoria (es. "Palestra", "Scuola Emma"):');
+    if(!label) return;
+    const icon = prompt('Emoji per la categoria (facoltativa):', '🏷️') || '🏷️';
+    addCustomCategory(label.trim(), icon.trim());
+    render();
+  };
+  addCatBar.appendChild(addCatBtn);
+  const addCatHint = document.createElement('div');
+  addCatHint.className = 'hint';
+  addCatHint.style.padding = '0';
+  addCatHint.textContent = 'La categoria verrà creata in tutti i 12 mesi.';
+  addCatBar.appendChild(addCatHint);
+  container.appendChild(addCatBar);
+
+  const summaryHolder = document.createElement('div');
+  summaryHolder.id = 'summary-' + monthKey;
+  summaryHolder.appendChild(renderSummaryCard(monthKey));
+  container.appendChild(summaryHolder);
+
+  return container;
+}
+
+function renderSectionCard(monthKey, def){
+  const mo = DB.months[monthKey];
+  const sec = mo.sections[def.key];
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const stateKey = monthKey + '|' + def.key;
+  const isOpen = !!COLLAPSE_STATE[stateKey]; // chiusa di default
+
+  const head = document.createElement('div');
+  head.className = 'head';
+  head.style.cursor = 'pointer';
+
+  const titleWrap = document.createElement('div');
+  titleWrap.style.cssText = 'display:flex; align-items:center; gap:8px;';
+  const chevron = document.createElement('span');
+  chevron.textContent = isOpen ? '▾' : '▸';
+  chevron.style.cssText = 'font-size:11px; color:var(--muted); width:10px; display:inline-block;';
+  const h2 = document.createElement('h2');
+  h2.textContent = def.icon + ' ' + def.label;
+  titleWrap.appendChild(chevron);
+  titleWrap.appendChild(h2);
+  head.appendChild(titleWrap);
+
+  if(def.custom){
+    const headActions = document.createElement('div');
+    headActions.className = 'actions';
+    const delCatBtn = document.createElement('button');
+    delCatBtn.className = 'btn danger small';
+    delCatBtn.textContent = 'Elimina categoria';
+    delCatBtn.onclick = (e)=>{
+      e.stopPropagation();
+      if(!confirm('Eliminare la categoria "'+def.label+'" da tutti i mesi? I dati inseriti andranno persi.')) return;
+      removeCustomCategory(def.key);
+      render();
+    };
+    headActions.appendChild(delCatBtn);
+    head.appendChild(headActions);
+  }
+  card.appendChild(head);
+
+  const body = document.createElement('div');
+  body.style.display = isOpen ? '' : 'none';
+
+  head.onclick = ()=>{
+    const nowOpen = body.style.display === 'none';
+    body.style.display = nowOpen ? '' : 'none';
+    chevron.textContent = nowOpen ? '▾' : '▸';
+    COLLAPSE_STATE[stateKey] = nowOpen;
+  };
+
+  const onDataChange = ()=>{ scheduleSave(); refreshSummary(monthKey); };
+  const onStructuralChange = ()=>{
+    scheduleSave();
+    const newCard = renderSectionCard(monthKey, def);
+    card.replaceWith(newCard);
+    refreshSummary(monthKey);
+  };
+  body.appendChild(renderTable(sec, onDataChange, onStructuralChange));
+  body.appendChild(addRowControls(sec, onStructuralChange));
+  const hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.textContent = def.kind === 'rata'
+    ? 'Spunta "Condivisa" se questa rata va inclusa nella divisione spese sotto; deselezionala se è una rata personale.'
+    : 'Le voci sono condivise per default e sommate nel riepilogo sotto. Deseleziona "Condivisa" per una spesa solo personale, esclusa dalla divisione.';
+  body.appendChild(hint);
+  card.appendChild(body);
+
+  return card;
+}
+
+function refreshSummary(monthKey){
+  const holder = document.getElementById('summary-' + monthKey);
+  if(!holder) return;
+  holder.innerHTML = '';
+  holder.appendChild(renderSummaryCard(monthKey));
+}
+
+function renderSummaryCard(monthKey){
+  const mo = DB.months[monthKey];
+  mo.adjustments = mo.adjustments || [];
+  const card = document.createElement('div');
+  card.className = 'card';
+  const head = document.createElement('div');
+  head.className = 'head';
+  head.innerHTML = '<h2>⚖️ Riepilogo e divisione spese</h2>';
+  card.appendChild(head);
+
+  const pctRow = document.createElement('div');
+  pctRow.className = 'pctrow';
+  pctRow.innerHTML =
+    '<label>Quota Claudio <input type="number" id="pctC-'+monthKey+'" min="0" max="100" value="'+mo.splitPct.claudio+'"> %</label>' +
+    '<label>Quota Federica <input type="number" id="pctF-'+monthKey+'" min="0" max="100" value="'+mo.splitPct.federica+'"> %</label>';
+  card.appendChild(pctRow);
+
+  const gridHolder = document.createElement('div');
+  const adjHolder = document.createElement('div');
+  const saldoHolder = document.createElement('div');
+
+  function refreshCalc(){
+    const t = computeMonthTotals(monthKey);
+    gridHolder.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'summary-grid';
+    const cells = [
+      ['Totale comune (condiviso)', eur(t.comune)],
+      ['Quota Claudio', eur(t.quotaClaudio)],
+      ['Quota Federica', eur(t.quotaFederica)],
+      ['Pagato da Claudio', eur(t.pagatoClaudio)],
+      ['Pagato da Federica', eur(t.pagatoFederica)],
+      ['Totale generale mese', eur(t.totaleGenerale)]
+    ];
+    cells.forEach(([label,val])=>{
+      const c = document.createElement('div');
+      c.className = 'cell';
+      c.innerHTML = '<div class="label">'+label+'</div><div class="value">'+val+'</div>';
+      grid.appendChild(c);
+    });
+    gridHolder.appendChild(grid);
+
+    saldoHolder.innerHTML = '';
+    const line = document.createElement('div');
+    line.className = 'saldo-line';
+    const abs = Math.abs(t.saldo);
+    let breakdown = 'Da divisione spese: ' + eur(t.saldoDivisione) + (t.saldoDivisione>=0?' (Fede→Cla)':' (Cla→Fede)');
+    if(Math.abs(t.adjTotal) >= 0.005){
+      breakdown += ' · Rettifiche: ' + eur(t.adjTotal) + (t.adjTotal>=0?' (a favore di Claudio)':' (a favore di Federica)');
+    }
+    if(Math.abs(t.saldo) < 0.005){
+      line.innerHTML = '<span class="badge good">In pari</span> nessun saldo da regolare tra Claudio e Federica.'+
+        '<div class="hint" style="padding:6px 0 0;">'+breakdown+'</div>';
+    } else if(t.saldo > 0){
+      line.innerHTML = '<span class="badge bad">Saldo</span> Federica deve dare a Claudio <strong>'+eur(abs)+'</strong>'+
+        '<div class="hint" style="padding:6px 0 0;">'+breakdown+'</div>';
+    } else {
+      line.innerHTML = '<span class="badge bad">Saldo</span> Claudio deve dare a Federica <strong>'+eur(abs)+'</strong>'+
+        '<div class="hint" style="padding:6px 0 0;">'+breakdown+'</div>';
+    }
+    saldoHolder.appendChild(line);
+  }
+
+  function renderAdjustments(){
+    adjHolder.innerHTML = '';
+    const subhead = document.createElement('div');
+    subhead.style.cssText = 'padding:12px 16px 2px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; border-top:1px solid var(--line);';
+    subhead.textContent = 'Rettifiche manuali al saldo (non entrano nella divisione automatica)';
+    adjHolder.appendChild(subhead);
+
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Descrizione</th><th>Importo €</th><th>A favore di</th><th></th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+
+    if(mo.adjustments.length === 0){
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="4" class="emptyrow">Nessuna rettifica. Usala per es. per un prestito occasionale o una spesa extra a carico di uno solo.</td>';
+      tbody.appendChild(tr);
+    }
+
+    mo.adjustments.forEach(item=>{
+      const tr = document.createElement('tr');
+
+      const tdDesc = document.createElement('td');
+      const inDesc = document.createElement('input');
+      inDesc.type = 'text'; inDesc.placeholder = 'es. prestito contanti';
+      inDesc.value = item.descr || '';
+      inDesc.oninput = ()=>{ item.descr = inDesc.value; scheduleSave(); };
+      tdDesc.appendChild(inDesc); tr.appendChild(tdDesc);
+
+      const tdImp = document.createElement('td'); tdImp.className = 'num';
+      const inImp = document.createElement('input');
+      inImp.type = 'number'; inImp.step = '0.01'; inImp.placeholder = '0';
+      inImp.value = (item.importo === undefined || item.importo === '') ? '' : item.importo;
+      inImp.oninput = ()=>{ item.importo = inImp.value; scheduleSave(); refreshCalc(); };
+      tdImp.appendChild(inImp); tr.appendChild(tdImp);
+
+      const tdFav = document.createElement('td');
+      const selFav = document.createElement('select');
+      ['Claudio','Federica'].forEach(v=>{
+        const o = document.createElement('option'); o.value = v; o.textContent = v;
+        if(item.favore === v) o.selected = true;
+        selFav.appendChild(o);
+      });
+      selFav.onchange = ()=>{ item.favore = selFav.value; scheduleSave(); refreshCalc(); };
+      tdFav.appendChild(selFav); tr.appendChild(tdFav);
+
+      const tdDel = document.createElement('td');
+      tdDel.className = 'rowdel';
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '🗑';
+      delBtn.onclick = ()=>{
+        const i = mo.adjustments.indexOf(item);
+        mo.adjustments.splice(i,1);
+        scheduleSave();
+        renderAdjustments();
+        refreshCalc();
+      };
+      tdDel.appendChild(delBtn); tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    adjHolder.appendChild(table);
+
+    const bar = document.createElement('div');
+    bar.className = 'foot-add';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn';
+    addBtn.textContent = '+ Rettifica';
+    addBtn.onclick = ()=>{
+      mo.adjustments.push({id: uid(), descr:'', importo:'', favore:'Claudio'});
+      scheduleSave();
+      renderAdjustments();
+      refreshCalc();
+    };
+    bar.appendChild(addBtn);
+    adjHolder.appendChild(bar);
+  }
+
+  refreshCalc();
+  renderAdjustments();
+  card.appendChild(gridHolder);
+  card.appendChild(adjHolder);
+  card.appendChild(saldoHolder);
+
+  setTimeout(()=>{
+    const pc = document.getElementById('pctC-'+monthKey);
+    const pf = document.getElementById('pctF-'+monthKey);
+    pc.oninput = ()=>{
+      mo.splitPct.claudio = parseFloat(pc.value)||0;
+      mo.splitPct.federica = Math.max(0, 100 - mo.splitPct.claudio);
+      pf.value = mo.splitPct.federica;
+      refreshCalc(); scheduleSave();
+    };
+    pf.oninput = ()=>{
+      mo.splitPct.federica = parseFloat(pf.value)||0;
+      mo.splitPct.claudio = Math.max(0, 100 - mo.splitPct.federica);
+      pc.value = mo.splitPct.claudio;
+      refreshCalc(); scheduleSave();
+    };
+  },0);
+
+  return card;
+}
+
+/* ---------------------------------------------------------
+   RENDER: RICORRENTI
+--------------------------------------------------------- */
+function renderRecurring(){
+  const container = document.createElement('div');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  const head = document.createElement('div');
+  head.className = 'head';
+  head.innerHTML = '<h2>🔁 Pagamenti frequenti</h2>';
+  const monthSel = document.createElement('select');
+  monthSel.className = 'mini';
+  MONTHS.forEach(m=>{
+    const o = document.createElement('option');
+    o.value = m.key; o.textContent = 'Aggiungi a: ' + m.label;
+    if(m.key === RECURRING_TARGET_MONTH) o.selected = true;
+    monthSel.appendChild(o);
+  });
+  monthSel.onchange = ()=> RECURRING_TARGET_MONTH = monthSel.value;
+  head.appendChild(monthSel);
+  card.appendChild(head);
+
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  thead.innerHTML = '<tr><th>Nome</th><th>Importo €</th><th>Categoria</th><th>Giorno scadenza</th><th>Pagato da</th><th>Attivo</th><th>Prossima scadenza</th><th></th><th></th></tr>';
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+
+  if(DB.recurring.length === 0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="9" class="emptyrow">Nessun pagamento ricorrente. Aggiungine uno (affitto, Sky, Vodafone, assicurazione...).</td>';
+    tbody.appendChild(tr);
+  }
+
+  DB.recurring.forEach(item=>{
+    const tr = document.createElement('tr');
+
+    const tdNome = document.createElement('td');
+    const inNome = document.createElement('input'); inNome.type='text'; inNome.value = item.nome||'';
+    inNome.oninput = ()=>{ item.nome = inNome.value; scheduleSave(); };
+    tdNome.appendChild(inNome); tr.appendChild(tdNome);
+
+    const tdImp = document.createElement('td'); tdImp.className='num';
+    const inImp = document.createElement('input'); inImp.type='number'; inImp.step='0.01'; inImp.value = item.importo||'';
+    inImp.oninput = ()=>{ item.importo = inImp.value; scheduleSave(); };
+    tdImp.appendChild(inImp); tr.appendChild(tdImp);
+
+    const tdCat = document.createElement('td');
+    const selCat = document.createElement('select');
+    allSectionDefs().forEach(d=>{
+      const o = document.createElement('option'); o.value = d.key; o.textContent = d.label;
+      if(item.categoria === d.key) o.selected = true;
+      selCat.appendChild(o);
+    });
+    selCat.onchange = ()=>{ item.categoria = selCat.value; scheduleSave(); };
+    tdCat.appendChild(selCat); tr.appendChild(tdCat);
+
+    const tdGiorno = document.createElement('td');
+    const inGiorno = document.createElement('input'); inGiorno.type='number'; inGiorno.min=1; inGiorno.max=31; inGiorno.value = item.giorno||'';
+    inGiorno.oninput = ()=>{ item.giorno = inGiorno.value; scheduleSave(); render_recurring_row_dates(); };
+    tdGiorno.appendChild(inGiorno); tr.appendChild(tdGiorno);
+
+    const tdChi = document.createElement('td');
+    const selChi = document.createElement('select');
+    ['Claudio','Federica','Comune'].forEach(v=>{
+      const o = document.createElement('option'); o.value=v; o.textContent=v;
+      if(item.pagatoda === v) o.selected = true;
+      selChi.appendChild(o);
+    });
+    selChi.onchange = ()=>{ item.pagatoda = selChi.value; scheduleSave(); };
+    tdChi.appendChild(selChi); tr.appendChild(tdChi);
+
+    const tdAttivo = document.createElement('td');
+    const inAttivo = document.createElement('input'); inAttivo.type='checkbox'; inAttivo.checked = item.attivo !== false;
+    inAttivo.onchange = ()=>{ item.attivo = inAttivo.checked; scheduleSave(); };
+    tdAttivo.appendChild(inAttivo); tr.appendChild(tdAttivo);
+
+    const tdNext = document.createElement('td');
+    tdNext.textContent = nextOccurrence(item.giorno);
+    tdNext.dataset.role = 'nextdate-' + item.id;
+    tr.appendChild(tdNext);
+
+    const tdAdd = document.createElement('td');
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn primary small';
+    addBtn.textContent = '+ Mese';
+    addBtn.onclick = ()=> addRecurringToMonth(item, RECURRING_TARGET_MONTH);
+    tdAdd.appendChild(addBtn); tr.appendChild(tdAdd);
+
+    const tdDel = document.createElement('td');
+    tdDel.className = 'rowdel';
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '🗑';
+    delBtn.onclick = ()=>{
+      const i = DB.recurring.indexOf(item);
+      DB.recurring.splice(i,1);
+      scheduleSave();
+      render();
+    };
+    tdDel.appendChild(delBtn); tr.appendChild(tdDel);
+
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  card.appendChild(table);
+
+  const bar = document.createElement('div');
+  bar.className = 'foot-add';
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn primary';
+  addBtn.textContent = '+ Pagamento ricorrente';
+  addBtn.onclick = ()=>{
+    DB.recurring.push({id: uid(), nome:'', importo:'', categoria:'casa', giorno:1, pagatoda:'Claudio', attivo:true});
+    scheduleSave();
+    render();
+  };
+  bar.appendChild(addBtn);
+  card.appendChild(bar);
+  const hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.textContent = 'Usa "+ Mese" per inserire automaticamente la voce nel mese selezionato in alto, nella sezione corrispondente.';
+  card.appendChild(hint);
+
+  container.appendChild(card);
+  return container;
+}
+
+function nextOccurrence(giorno){
+  const g = parseInt(giorno);
+  if(!g || g < 1 || g > 31) return '—';
+  const today = new Date();
+  let d = new Date(today.getFullYear(), today.getMonth(), g);
+  if(d < today) d = new Date(today.getFullYear(), today.getMonth()+1, g);
+  return d.toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
+}
+function render_recurring_row_dates(){ /* ricalcolo gestito da re-render completo per semplicità */ }
+
+function addRecurringToMonth(item, monthKey){
+  const mo = DB.months[monthKey];
+  const def = allSectionDefs().find(d=>d.key === item.categoria) || allSectionDefs()[0];
+  const sec = mo.sections[def.key];
+  const dateStr = DB.meta.anno + '-' + monthKey + '-' + String(item.giorno||1).padStart(2,'0');
+  const cells = {};
+  sec.columns.forEach(c=>{
+    if(c.type === 'checkbox') cells[c.id] = true;
+    else if(c.type === 'select') cells[c.id] = (c.options && c.options[0]) || '';
+    else cells[c.id] = '';
+  });
+
+  if(def.kind === 'rata'){
+    cells.nome = item.nome;
+    cells.importo = item.importo;
+    cells.scadenza = dateStr;
+    cells.pagatoda = item.pagatoda;
+    cells.condivisa = true;
+  } else {
+    cells.data = dateStr;
+    cells.voce = item.nome;
+    if(item.pagatoda === 'Federica') cells.federica = item.importo;
+    else if(item.pagatoda === 'Comune'){
+      const half = (numOf(item.importo)/2).toFixed(2);
+      cells.claudio = half; cells.federica = half;
+    } else cells.claudio = item.importo;
+    cells.condivisa = true;
+  }
+  sec.rows.push({id: uid(), cells});
+  scheduleSave();
+  alert('Aggiunto a ' + (MONTHS.find(m=>m.key===monthKey)||{}).label + ' → ' + def.label);
+}
+
+/* ---------------------------------------------------------
+   RENDER: DASHBOARD
+--------------------------------------------------------- */
+function renderDashboard(){
+  const container = document.createElement('div');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  const head = document.createElement('div');
+  head.className = 'head';
+  head.innerHTML = '<h2>📊 Riepilogo anno ' + DB.meta.anno + '</h2>';
+  card.appendChild(head);
+
+  const table = document.createElement('table');
+  table.className = 'dash-table';
+  const thead = document.createElement('thead');
+  let headRow = '<tr><th>Mese</th>';
+  allSectionDefs().forEach(d=> headRow += '<th>'+d.icon+' '+d.label+'</th>');
+  headRow += '<th class="tot">Totale mese</th><th>Pagato Claudio</th><th>Pagato Federica</th><th>Saldo</th></tr>';
+  thead.innerHTML = headRow;
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  const grand = {}; allSectionDefs().forEach(d=> grand[d.key]=0);
+  let grandTot=0, grandC=0, grandF=0;
+
+  MONTHS.forEach(m=>{
+    const t = computeMonthTotals(m.key);
+    let row = '<tr><td>'+m.label+'</td>';
+    allSectionDefs().forEach(d=>{
+      row += '<td>'+eur(t.perCategoria[d.key])+'</td>';
+      grand[d.key] += t.perCategoria[d.key];
+    });
+    row += '<td class="tot">'+eur(t.totaleGenerale)+'</td>';
+    row += '<td>'+eur(t.pagatoClaudio+t.personaleClaudio)+'</td>';
+    row += '<td>'+eur(t.pagatoFederica+t.personaleFederica)+'</td>';
+    const abs = Math.abs(t.saldo);
+    if(abs < 0.005) row += '<td>in pari</td>';
+    else row += '<td>'+(t.saldo>0?'Fede → Cla ':'Cla → Fede ')+eur(abs)+'</td>';
+    row += '</tr>';
+    tbody.appendChild(document.createRange().createContextualFragment(row));
+    grandTot += t.totaleGenerale; grandC += t.pagatoClaudio+t.personaleClaudio; grandF += t.pagatoFederica+t.personaleFederica;
+  });
+
+  let footRow = '<tr><td class="tot">Totale anno</td>';
+  allSectionDefs().forEach(d=> footRow += '<td class="tot">'+eur(grand[d.key])+'</td>');
+  footRow += '<td class="tot">'+eur(grandTot)+'</td><td class="tot">'+eur(grandC)+'</td><td class="tot">'+eur(grandF)+'</td><td></td></tr>';
+  tbody.appendChild(document.createRange().createContextualFragment(footRow));
+
+  table.appendChild(tbody);
+  card.appendChild(table);
+  container.appendChild(card);
+
+  return container;
+}
+
+/* ---------------------------------------------------------
+   RENDER MASTER
+--------------------------------------------------------- */
+function render(){
+  renderNav();
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  if(ACTIVE === 'dashboard') main.appendChild(renderDashboard());
+  else if(ACTIVE === 'recurring') main.appendChild(renderRecurring());
+  else main.appendChild(renderMonthPage(ACTIVE));
+}
+
+/* ---------------------------------------------------------
+   INIT
+--------------------------------------------------------- */
+(async function init(){
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="card"><div class="head"><h2>Caricamento…</h2></div></div>';
+  await loadDB();
+  const now = new Date();
+  ACTIVE = MONTHS[now.getMonth()].key;
+  const syncEl = document.getElementById('syncStatus');
+  if(syncEl){
+    syncEl.textContent = HAS_SUPABASE
+      ? 'Sincronizzato tra i tuoi device tramite Supabase.'
+      : (HAS_CLAUDE_STORAGE
+          ? 'Salvataggio nella memoria di Claude.'
+          : 'Salvataggio solo su questo browser — configura Supabase per sincronizzare tra device.');
+  }
+  render();
+})();
+</script>
+</body>
+</html>
