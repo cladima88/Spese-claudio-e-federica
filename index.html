@@ -335,7 +335,7 @@ function newSection(kind){
 function newMonth(){
   const sections = {};
   allSectionDefs().forEach(s => sections[s.key] = newSection(s.kind));
-  return { splitPct: {claudio:50, federica:50}, sections, adjustments: [] };
+  return { splitPct: {claudio:50, federica:50}, sections, adjustments: [], settlement: {done:false, date:'', note:''} };
 }
 
 function defaultDB(){
@@ -345,7 +345,8 @@ function defaultDB(){
     meta:{ anno: new Date().getFullYear(), splitDefault:{claudio:50, federica:50} },
     months,
     recurring: [],
-    customCategories: []
+    customCategories: [],
+    shoppingList: []
   };
 }
 
@@ -454,8 +455,10 @@ function migrate(db){
       if(!mo.sections[s.key].rows) mo.sections[s.key].rows = [];
     });
     mo.adjustments = mo.adjustments || [];
+    mo.settlement = mo.settlement || {done:false, date:'', note:''};
   });
   db.recurring = db.recurring || [];
+  db.shoppingList = db.shoppingList || [];
   return db;
 }
 
@@ -594,6 +597,12 @@ function renderNav(){
   recBtn.className = ACTIVE === 'recurring' ? 'active' : '';
   recBtn.onclick = () => { ACTIVE = 'recurring'; render(); };
   nav.appendChild(recBtn);
+
+  const shopBtn = document.createElement('button');
+  shopBtn.textContent = '🛒 Lista Spesa';
+  shopBtn.className = ACTIVE === 'shopping' ? 'active' : '';
+  shopBtn.onclick = () => { ACTIVE = 'shopping'; render(); };
+  nav.appendChild(shopBtn);
 
   if(HAS_SUPABASE){
     const refreshBtn = document.createElement('button');
@@ -1047,6 +1056,7 @@ function refreshSummary(monthKey){
 function renderSummaryCard(monthKey){
   const mo = DB.months[monthKey];
   mo.adjustments = mo.adjustments || [];
+  mo.settlement = mo.settlement || {done:false, date:'', note:''};
   const card = document.createElement('div');
   card.className = 'card';
   const head = document.createElement('div');
@@ -1105,6 +1115,44 @@ function renderSummaryCard(monthKey){
         '<div class="hint" style="padding:6px 0 0;">'+breakdown+'</div>';
     }
     saldoHolder.appendChild(line);
+
+    const settleRow = document.createElement('div');
+    settleRow.style.cssText = 'margin-top:10px; padding-top:10px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px;';
+
+    const chkLabel = document.createElement('label');
+    chkLabel.style.cssText = 'display:flex; align-items:center; gap:6px; font-weight:600; cursor:pointer;';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = !!mo.settlement.done;
+    chkLabel.appendChild(chk);
+    chkLabel.appendChild(document.createTextNode('Saldato'));
+    settleRow.appendChild(chkLabel);
+
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = mo.settlement.date || '';
+    dateInput.style.cssText = 'border:1px solid var(--line); border-radius:6px; padding:6px 8px; font-size:13px;';
+    settleRow.appendChild(dateInput);
+
+    const noteInput = document.createElement('input');
+    noteInput.type = 'text';
+    noteInput.placeholder = 'come (es. bonifico, contanti...)';
+    noteInput.value = mo.settlement.note || '';
+    noteInput.style.cssText = 'flex:1; min-width:160px; border:1px solid var(--line); border-radius:6px; padding:6px 8px; font-size:13px;';
+    settleRow.appendChild(noteInput);
+
+    chk.onchange = ()=>{
+      mo.settlement.done = chk.checked;
+      if(chk.checked && !mo.settlement.date){
+        mo.settlement.date = new Date().toISOString().slice(0,10);
+        dateInput.value = mo.settlement.date;
+      }
+      scheduleSave();
+    };
+    dateInput.oninput = ()=>{ mo.settlement.date = dateInput.value; scheduleSave(); };
+    noteInput.oninput = ()=>{ mo.settlement.note = noteInput.value; scheduleSave(); };
+
+    saldoHolder.appendChild(settleRow);
   }
 
   function renderAdjustments(){
@@ -1474,6 +1522,13 @@ function renderDashMonthCard(m, t){
     saldoBadge.textContent = (t.saldo > 0 ? 'Fede→Cla ' : 'Cla→Fede ') + eur(abs);
   }
   right.appendChild(saldoBadge);
+  const mo = DB.months[m.key];
+  if(mo.settlement && mo.settlement.done){
+    const doneBadge = document.createElement('span');
+    doneBadge.className = 'badge good';
+    doneBadge.textContent = '✓ Saldato' + (mo.settlement.date ? ' ' + mo.settlement.date.split('-').reverse().join('/') : '');
+    right.appendChild(doneBadge);
+  }
   head.appendChild(right);
   card.appendChild(head);
 
@@ -1508,6 +1563,149 @@ function renderDashMonthCard(m, t){
 }
 
 /* ---------------------------------------------------------
+   RENDER: LISTA SPESA (ottimizzata mobile: righe verticali, non tabella)
+--------------------------------------------------------- */
+function renderShoppingList(){
+  DB.shoppingList = DB.shoppingList || [];
+  const container = document.createElement('div');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const head = document.createElement('div');
+  head.className = 'head';
+  const h2 = document.createElement('h2');
+  h2.textContent = '🛒 Lista della spesa';
+  head.appendChild(h2);
+  const totBadge = document.createElement('span');
+  totBadge.style.cssText = 'font-weight:700; font-size:13px;';
+  head.appendChild(totBadge);
+  card.appendChild(head);
+
+  const listHolder = document.createElement('div');
+  card.appendChild(listHolder);
+
+  function refreshTotal(){
+    const tot = DB.shoppingList.reduce((a,i)=>a+numOf(i.prezzo),0);
+    const totComprato = DB.shoppingList.reduce((a,i)=>a + (i.comprato? numOf(i.prezzo) : 0), 0);
+    totBadge.textContent = 'Tot. lista ' + eur(tot) + ' · nel carrello ' + eur(totComprato);
+  }
+
+  function renderItems(){
+    listHolder.innerHTML = '';
+    if(DB.shoppingList.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'emptyrow';
+      empty.style.padding = '18px 16px';
+      empty.textContent = 'Lista vuota. Aggiungi il primo prodotto qui sotto.';
+      listHolder.appendChild(empty);
+      return;
+    }
+    DB.shoppingList.forEach(item=>{
+      const row = document.createElement('div');
+      row.style.cssText = 'padding:12px 16px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:8px;';
+
+      const topLine = document.createElement('div');
+      topLine.style.cssText = 'display:flex; align-items:center; gap:10px;';
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.checked = !!item.comprato;
+      chk.style.cssText = 'width:22px; height:22px; flex-shrink:0;';
+      topLine.appendChild(chk);
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.placeholder = 'Nome prodotto';
+      nameInput.value = item.nome || '';
+      nameInput.style.cssText = 'flex:1; min-width:0; border:1px solid transparent; background:transparent; font-size:16px; font-weight:600; padding:6px 4px; border-radius:5px;' +
+        (item.comprato ? 'text-decoration:line-through; opacity:.5;' : '');
+      nameInput.oninput = ()=>{ item.nome = nameInput.value; scheduleSave(); };
+      topLine.appendChild(nameInput);
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '🗑';
+      delBtn.style.cssText = 'border:none; background:none; color:var(--bad); font-size:17px; cursor:pointer; flex-shrink:0; padding:4px;';
+      delBtn.onclick = ()=>{
+        const i = DB.shoppingList.indexOf(item);
+        DB.shoppingList.splice(i,1);
+        scheduleSave();
+        renderItems();
+        refreshTotal();
+      };
+      topLine.appendChild(delBtn);
+      row.appendChild(topLine);
+
+      const bottomLine = document.createElement('div');
+      bottomLine.style.cssText = 'display:flex; gap:8px; padding-left:32px;';
+
+      const superInput = document.createElement('input');
+      superInput.type = 'text';
+      superInput.placeholder = 'Supermercato';
+      superInput.value = item.supermercato || '';
+      superInput.style.cssText = 'flex:1; min-width:0; border:1px solid var(--line); border-radius:6px; padding:7px 8px; font-size:16px;';
+      superInput.oninput = ()=>{ item.supermercato = superInput.value; scheduleSave(); };
+      bottomLine.appendChild(superInput);
+
+      const priceInput = document.createElement('input');
+      priceInput.type = 'number';
+      priceInput.step = '0.01';
+      priceInput.placeholder = 'Prezzo €';
+      priceInput.value = (item.prezzo === undefined || item.prezzo === '') ? '' : item.prezzo;
+      priceInput.style.cssText = 'width:100px; flex-shrink:0; border:1px solid var(--line); border-radius:6px; padding:7px 8px; font-size:16px; text-align:right;';
+      priceInput.oninput = ()=>{ item.prezzo = priceInput.value; scheduleSave(); refreshTotal(); };
+      bottomLine.appendChild(priceInput);
+
+      row.appendChild(bottomLine);
+
+      chk.onchange = ()=>{
+        item.comprato = chk.checked;
+        nameInput.style.textDecoration = chk.checked ? 'line-through' : 'none';
+        nameInput.style.opacity = chk.checked ? '.5' : '1';
+        scheduleSave();
+        refreshTotal();
+      };
+
+      listHolder.appendChild(row);
+    });
+  }
+
+  const bar = document.createElement('div');
+  bar.className = 'foot-add';
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn primary';
+  addBtn.textContent = '+ Aggiungi prodotto';
+  addBtn.onclick = ()=>{
+    DB.shoppingList.push({id: uid(), nome:'', supermercato:'', prezzo:'', comprato:false});
+    scheduleSave();
+    renderItems();
+    refreshTotal();
+  };
+  bar.appendChild(addBtn);
+
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'btn';
+  clearBtn.textContent = '🧹 Svuota comprati';
+  clearBtn.title = 'Rimuove le voci già spuntate come comprate';
+  clearBtn.onclick = ()=>{
+    if(!confirm('Rimuovere tutte le voci già segnate come comprate?')) return;
+    DB.shoppingList = DB.shoppingList.filter(i=>!i.comprato);
+    scheduleSave();
+    renderItems();
+    refreshTotal();
+  };
+  bar.appendChild(clearBtn);
+  card.appendChild(bar);
+
+  renderItems();
+  refreshTotal();
+
+  container.appendChild(card);
+  return container;
+}
+
+/* ---------------------------------------------------------
    RENDER MASTER
 --------------------------------------------------------- */
 function render(){
@@ -1516,6 +1714,7 @@ function render(){
   main.innerHTML = '';
   if(ACTIVE === 'dashboard') main.appendChild(renderDashboard());
   else if(ACTIVE === 'recurring') main.appendChild(renderRecurring());
+  else if(ACTIVE === 'shopping') main.appendChild(renderShoppingList());
   else main.appendChild(renderMonthPage(ACTIVE));
 }
 
