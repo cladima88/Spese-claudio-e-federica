@@ -260,6 +260,100 @@ select.mini{font-size:12px; padding:4px 6px; border-radius:6px; border:1px solid
   footer.savebar{font-size:11px;}
   footer.savebar span:last-child{width:100%; order:2;}
 }
+/* ---------- REPORT PDF MENSILE ---------- */
+body.report-open{overflow:hidden;}
+#report-overlay{
+  position:fixed; inset:0; z-index:200;
+  background:#d9d2c3; display:flex; flex-direction:column;
+}
+.rep-toolbar{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background:var(--panel); border-bottom:1px solid var(--line);
+}
+.rep-toolbar-title{font-weight:700; font-size:14px; text-align:center; flex:1; white-space:nowrap;}
+.rep-scroll{flex:1; overflow:auto; -webkit-overflow-scrolling:touch; padding:16px 12px calc(24px + env(safe-area-inset-bottom));}
+.rep-box{
+  max-width:820px; margin:0 auto; background:#fff; color:#1d1a17;
+  box-shadow:0 4px 22px rgba(0,0,0,.18); border-radius:4px;
+}
+.rep-note{padding:8px 14px calc(8px + env(safe-area-inset-bottom)); font-size:12px; color:var(--muted); background:var(--panel); border-top:1px solid var(--line);}
+
+.rep-sheet{padding:28px 30px 30px; font-size:13px; line-height:1.4;}
+.rep-head{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; padding-bottom:12px; border-bottom:3px solid var(--wine); margin-bottom:18px;}
+.rep-kicker{font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--wine); font-weight:700;}
+.rep-head h1{margin:2px 0 2px; font-family:'Iowan Old Style','Georgia',serif; font-size:28px; font-weight:600;}
+.rep-sub{font-size:12px; color:#6b6358;}
+.rep-gen{font-size:11px; color:#6b6358; white-space:nowrap;}
+.rep-empty{color:#6b6358; font-style:italic; padding:20px 0;}
+.rep-group, .rep-block{margin-bottom:16px;}
+.rep-group h2, .rep-block h2{
+  margin:0 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--wine); font-weight:700;
+}
+.rep-table, .rep-kv{width:100%; border-collapse:collapse; font-size:13px; min-width:0;}
+.rep-table{table-layout:fixed;}
+.rep-table col.col-date{width:92px;}
+.rep-table col.col-num{width:112px;}
+.rep-table th{
+  background:#f3ede0; color:#5d5446; font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;
+  padding:6px 8px; border:none; border-bottom:1px solid #d9d0bd; text-align:left;
+}
+.rep-table td, .rep-kv td{padding:6px 8px; border:none; border-bottom:1px solid #ece5d6; vertical-align:top; background:none;}
+.rep-table .num, .rep-kv .num{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+.rep-table .c-date{white-space:nowrap; color:#6b6358;}
+.rep-table .d-short{display:none;}
+.rep-table tfoot td{font-weight:700; background:#faf6ec; border-top:1px solid #d9d0bd; border-bottom:1px solid #d9d0bd;}
+.rep-kv tr.strong td{font-weight:700; background:#faf6ec;}
+.rep-muted{color:#8a8073; font-weight:400; font-size:11.5px;}
+.rep-final{margin-top:8px; border:2px solid var(--wine); border-radius:6px; padding:12px 16px; background:#faf3f1;}
+.rep-final-label{font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--wine); font-weight:700; margin-bottom:4px;}
+.rep-final-row{display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:15px;}
+.rep-final-row strong{font-size:24px; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.rep-settled{margin-top:8px; padding-top:8px; border-top:1px dashed #d9b8b8; font-size:12.5px; color:var(--good); font-weight:600;}
+
+@media(max-width:640px){
+  .rep-scroll{padding:8px 6px calc(16px + env(safe-area-inset-bottom));}
+  .rep-sheet{padding:12px 10px 14px; font-size:12px; line-height:1.3;}
+  .rep-sheet .long, .rep-kicker, .rep-sub, .rep-gen{display:none;}
+  .rep-head{padding-bottom:6px; margin-bottom:10px; border-bottom-width:2px;}
+  .rep-head h1{font-size:19px; margin:0;}
+  .rep-group, .rep-block{margin-bottom:10px;}
+  .rep-group h2, .rep-block h2{font-size:10.5px; margin-bottom:3px;}
+  .rep-table{min-width:0;}              /* annulla il min-width globale delle tabelle su mobile */
+  .rep-table th{padding:4px 4px; font-size:9.5px;}
+  .rep-table td, .rep-kv td{padding:4px 4px;}
+  .rep-table .c-date{font-size:11.5px;}
+  .rep-table .d-full{display:none;}
+  .rep-table .d-short{display:inline;}
+  .rep-table col.col-date{width:44px;}
+  .rep-table col.col-num{width:76px;}
+  .rep-final{padding:8px 10px; margin-top:4px;}
+  .rep-final-label{font-size:9.5px; margin-bottom:1px;}
+  .rep-final-row{flex-wrap:wrap; align-items:baseline; gap:2px 10px; font-size:13px;}
+  .rep-final-row strong{font-size:20px;}
+  .rep-settled{margin-top:5px; padding-top:5px; font-size:11.5px;}
+  .rep-toolbar{padding-top:calc(8px + env(safe-area-inset-top)); padding-bottom:8px; justify-content:space-between;}
+  .rep-toolbar .btn{padding:7px 12px;}
+  .rep-toolbar-title{display:none;}
+}
+
+@media print{
+  @page{size:A4 portrait; margin:14mm;}
+  html, body{background:#fff !important; padding:0 !important;}
+  body > :not(#report-overlay){display:none !important;}
+  #report-overlay{
+    position:static !important; display:block !important; background:none !important; inset:auto !important;
+  }
+  .rep-toolbar, .rep-note{display:none !important;}
+  .rep-scroll{overflow:visible !important; padding:0 !important;}
+  .rep-box{box-shadow:none !important; max-width:none !important; border-radius:0 !important;}
+  .rep-sheet{padding:0 !important; font-size:11.5px;}
+  .rep-sheet, .rep-sheet *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .rep-block, .rep-final{break-inside:avoid;}
+  .rep-group h2, .rep-block h2{break-after:avoid;}
+  .rep-table tr{break-inside:avoid;}
+  .rep-table thead{display:table-header-group;}
+}
 @supports (-webkit-touch-callout: none){
   /* Safari iOS: evita che il tap sui bottoni lasci l'highlight grigio di default */
   button, .btn{ -webkit-tap-highlight-color: transparent; }
@@ -1046,6 +1140,214 @@ function openImportExportModal(){
   document.body.appendChild(overlay);
 }
 
+/* ---------------------------------------------------------
+   REPORT PDF MENSILE (solo spese condivise)
+--------------------------------------------------------- */
+function escHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, ch => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]
+  ));
+}
+function fmtDateIt(iso){
+  if(!iso) return '';
+  const p = String(iso).split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+}
+function pctFmt(n){ return (Math.round(numOf(n)*100)/100).toString().replace('.', ','); }
+
+// Raccoglie SOLO le voci "Condivisa" (stessa regola usata nel calcolo del saldo)
+function buildMonthReport(monthKey){
+  const mo = DB.months[monthKey];
+  const pct = mo.splitPct || {claudio:50, federica:50};
+  const groups = [];
+  let totC = 0, totF = 0;
+
+  allSectionDefs().forEach(def=>{
+    const sec = mo.sections[def.key];
+    if(!sec) return;
+    const rows = [];
+    sec.rows.forEach(r=>{
+      if(r.cells.condivisa === false) return;
+      let c = 0, f = 0, data = '', voce = '';
+      if(def.kind === 'rata'){
+        const imp = numOf(r.cells.importo);
+        const chi = r.cells.pagatoda || 'Claudio';
+        if(chi === 'Federica') f = imp;
+        else if(chi === 'Comune'){ c = imp/2; f = imp/2; }
+        else c = imp;
+        data = r.cells.scadenza || '';
+        voce = r.cells.nome || '';
+        if(r.cells.progress) voce += (voce ? ' ' : '') + '(rata ' + r.cells.progress + ')';
+      } else {
+        c = numOf(r.cells.claudio);
+        f = numOf(r.cells.federica);
+        data = r.cells.data || '';
+        voce = r.cells.voce || '';
+      }
+      if(!voce && c === 0 && f === 0) return; // riga vuota
+      rows.push({data, voce, c, f});
+    });
+    if(!rows.length) return;
+    // ordine cronologico (le voci senza data restano in fondo, ordine di inserimento)
+    rows.sort((a,b)=>{
+      if(a.data && b.data) return a.data < b.data ? -1 : a.data > b.data ? 1 : 0;
+      if(a.data) return -1;
+      if(b.data) return 1;
+      return 0;
+    });
+    const sc = rows.reduce((s,r)=>s+r.c, 0);
+    const sf = rows.reduce((s,r)=>s+r.f, 0);
+    groups.push({label:def.label, rows, c:sc, f:sf});
+    totC += sc; totF += sf;
+  });
+
+  const comune = totC + totF;
+  const quotaC = comune * numOf(pct.claudio) / 100;
+  const quotaF = comune * numOf(pct.federica) / 100;
+  const saldoDiv = totC - quotaC; // >0: Federica deve a Claudio
+
+  const adjustments = (mo.adjustments || [])
+    .filter(a => numOf(a.importo) !== 0)
+    .map(a => ({descr:a.descr || 'Rettifica', importo:numOf(a.importo), favore:a.favore === 'Federica' ? 'Federica' : 'Claudio'}));
+  let adjTotal = 0;
+  adjustments.forEach(a => { adjTotal += (a.favore === 'Federica' ? -a.importo : a.importo); });
+
+  return {
+    groups, totC, totF, comune, quotaC, quotaF,
+    pctC: numOf(pct.claudio), pctF: numOf(pct.federica),
+    saldoDiv, adjustments, adjTotal,
+    saldo: saldoDiv + adjTotal,
+    settlement: mo.settlement || {done:false, date:'', note:''}
+  };
+}
+
+function monthReportHTML(monthKey){
+  const m = MONTHS.find(x => x.key === monthKey);
+  const d = buildMonthReport(monthKey);
+  const today = new Date().toLocaleDateString('it-IT');
+  let h = '<div class="rep-sheet">';
+
+  h += '<div class="rep-head"><div>' +
+         '<div class="rep-kicker">Gestione Spese</div>' +
+         '<h1>' + escHtml(m.label) + ' ' + escHtml(DB.meta.anno) + '</h1>' +
+         '<div class="rep-sub">Riepilogo delle sole spese condivise</div>' +
+       '</div><div class="rep-gen">Generato il ' + today + '</div></div>';
+
+  if(!d.groups.length){
+    h += '<p class="rep-empty">Nessuna spesa condivisa registrata per questo mese.</p>';
+  }
+
+  d.groups.forEach(g=>{
+    h += '<section class="rep-group"><h2>' + escHtml(g.label) + '</h2><table class="rep-table">' +
+         '<colgroup><col class="col-date"><col><col class="col-num"><col class="col-num"></colgroup>' +
+         '<thead><tr><th class="c-date">Data</th><th>Voce</th><th class="num">Claudio</th><th class="num">Federica</th></tr></thead><tbody>';
+    g.rows.forEach(r=>{
+      const dFull = fmtDateIt(r.data);
+      h += '<tr><td class="c-date"><span class="d-full">' + escHtml(dFull) + '</span><span class="d-short">' + escHtml(dFull.slice(0,5)) + '</span></td><td>' + escHtml(r.voce) + '</td>' +
+           '<td class="num">' + (r.c ? eur(r.c) : '–') + '</td><td class="num">' + (r.f ? eur(r.f) : '–') + '</td></tr>';
+    });
+    h += '</tbody><tfoot><tr><td></td><td>Subtotale<span class="long"> ' + escHtml(g.label) + '</span></td><td class="num">' + eur(g.c) +
+         '</td><td class="num">' + eur(g.f) + '</td></tr></tfoot></table></section>';
+  });
+
+  // Totali e divisione
+  h += '<section class="rep-block"><h2>Totali e divisione</h2><table class="rep-kv">' +
+       '<tr><td>Totale speso da Claudio</td><td class="num">' + eur(d.totC) + '</td></tr>' +
+       '<tr><td>Totale speso da Federica</td><td class="num">' + eur(d.totF) + '</td></tr>' +
+       '<tr class="strong"><td>Totale spese condivise</td><td class="num">' + eur(d.comune) + '</td></tr>' +
+       '<tr><td>Quota di Claudio (' + pctFmt(d.pctC) + '%)</td><td class="num">' + eur(d.quotaC) + '</td></tr>' +
+       '<tr><td>Quota di Federica (' + pctFmt(d.pctF) + '%)</td><td class="num">' + eur(d.quotaF) + '</td></tr>' +
+       '<tr class="strong"><td>' + (Math.abs(d.saldoDiv) < 0.005 ? 'Saldo dalla divisione' :
+            (d.saldoDiv > 0 ? 'Federica deve a Claudio<span class="long"> (da divisione)</span>' : 'Claudio deve a Federica<span class="long"> (da divisione)</span>')) +
+       '</td><td class="num">' + eur(Math.abs(d.saldoDiv)) + '</td></tr></table></section>';
+
+  // Rettifiche
+  if(d.adjustments.length){
+    h += '<section class="rep-block"><h2>Rettifiche manuali</h2><table class="rep-kv">';
+    d.adjustments.forEach(a=>{
+      h += '<tr><td>' + escHtml(a.descr) + ' <span class="rep-muted">· <span class="long">a favore di </span>' + a.favore + '</span></td>' +
+           '<td class="num">' + (a.favore === 'Federica' ? '− ' : '+ ') + eur(a.importo) + '</td></tr>';
+    });
+    h += '<tr class="strong"><td>Totale rettifiche<span class="rep-muted long"> (+ a favore di Claudio, − di Federica)</span></td><td class="num">' +
+         (d.adjTotal < -0.005 ? '− ' : d.adjTotal > 0.005 ? '+ ' : '') + eur(Math.abs(d.adjTotal)) + '</td></tr></table></section>';
+  }
+
+  // Totale finale
+  let finalText;
+  if(Math.abs(d.saldo) < 0.005) finalText = 'Nessun rimborso da effettuare: conti in pari';
+  else if(d.saldo > 0) finalText = 'Federica deve rimborsare a Claudio';
+  else finalText = 'Claudio deve rimborsare a Federica';
+  h += '<div class="rep-final"><div class="rep-final-label">Totale da rimborsare</div>' +
+       '<div class="rep-final-row"><span>' + finalText + '</span><strong>' + eur(Math.abs(d.saldo)) + '</strong></div>';
+  if(d.settlement && d.settlement.done){
+    h += '<div class="rep-settled">✓ Saldato' + (d.settlement.date ? ' il ' + escHtml(fmtDateIt(d.settlement.date)) : '') +
+         (d.settlement.note ? ' · ' + escHtml(d.settlement.note) : '') + '</div>';
+  }
+  h += '</div></div>';
+  return h;
+}
+
+function closeMonthReport(){
+  const ov = document.getElementById('report-overlay');
+  if(ov) ov.remove();
+  document.body.classList.remove('report-open');
+}
+
+function openMonthReport(monthKey){
+  closeMonthReport();
+  const m = MONTHS.find(x => x.key === monthKey);
+  const fileTitle = 'Spese ' + m.label + ' ' + DB.meta.anno;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'report-overlay';
+
+  const bar = document.createElement('div');
+  bar.className = 'rep-toolbar';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn';
+  closeBtn.textContent = '✕ Chiudi';
+  closeBtn.onclick = closeMonthReport;
+  const title = document.createElement('div');
+  title.className = 'rep-toolbar-title';
+  title.textContent = 'Anteprima report';
+  const printBtn = document.createElement('button');
+  printBtn.className = 'btn primary';
+  printBtn.textContent = '🖨️ Stampa / Salva PDF';
+  printBtn.onclick = ()=>{
+    const prev = document.title;
+    document.title = fileTitle; // diventa il nome di default del PDF
+    const restore = ()=>{ document.title = prev; window.removeEventListener('afterprint', restore); };
+    window.addEventListener('afterprint', restore);
+    window.print();
+    setTimeout(()=>{ if(document.title === fileTitle) document.title = prev; }, 4000);
+  };
+  bar.appendChild(closeBtn);
+  bar.appendChild(title);
+  bar.appendChild(printBtn);
+  overlay.appendChild(bar);
+
+  const scroll = document.createElement('div');
+  scroll.className = 'rep-scroll';
+  const box = document.createElement('div');
+  box.className = 'rep-box';
+  box.innerHTML = monthReportHTML(monthKey);
+  scroll.appendChild(box);
+  overlay.appendChild(scroll);
+
+  const standalone = (window.navigator.standalone === true) ||
+                     (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if(standalone){
+    const note = document.createElement('div');
+    note.className = 'rep-note';
+    note.textContent = 'Se la stampa non parte da qui, apri il sito da Safari e riprova: da lì puoi salvare il PDF in File.';
+    overlay.appendChild(note);
+  }
+
+  overlay.onclick = (e)=>{ if(e.target === overlay || e.target === scroll) closeMonthReport(); };
+  document.body.appendChild(overlay);
+  document.body.classList.add('report-open');
+}
+
 function refreshSummary(monthKey){
   const holder = document.getElementById('summary-' + monthKey);
   if(!holder) return;
@@ -1062,6 +1364,12 @@ function renderSummaryCard(monthKey){
   const head = document.createElement('div');
   head.className = 'head';
   head.innerHTML = '<h2>⚖️ Riepilogo e divisione spese</h2>';
+  const pdfBtn = document.createElement('button');
+  pdfBtn.className = 'btn';
+  pdfBtn.textContent = '🖨️ Report PDF';
+  pdfBtn.title = 'Anteprima e stampa/salvataggio PDF delle sole spese condivise di questo mese';
+  pdfBtn.onclick = ()=> openMonthReport(monthKey);
+  head.appendChild(pdfBtn);
   card.appendChild(head);
 
   const pctRow = document.createElement('div');
